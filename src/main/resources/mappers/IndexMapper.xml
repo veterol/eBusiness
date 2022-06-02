@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ch.ebusiness.repository.before.IndexRepository">
+	<!-- 查询广告商品 -->
+	<select id="selectAdvertisementGoods"  resultType="com.ch.ebusiness.entity.Goods">
+		select 
+			gt.*, gy.typename 
+		from 
+			goodstable gt,goodstype gy 
+		where 
+			gt.goodstype_id = gy.id 
+			and gt.isAdvertisement = 1
+		order by  gt.id desc limit 5 
+	</select>
+	<!-- 查询商品详情 -->
+	<select id="selectAGoods"  resultType="com.ch.ebusiness.entity.Goods">
+		select 
+			gt.*, gy.typename 
+		from 
+			goodstable gt,goodstype gy 
+		where 
+			gt.goodstype_id = gy.id 
+			and gt.id = #{id}
+	</select>
+	<!-- 查询商品类型 -->
+	<select id="selectGoodsType" resultType="com.ch.ebusiness.entity.GoodsType">
+		select * from goodstype
+	</select>
+	<update id="makeGoodsRecommend" parameterType="Integer">
+	</update>
+	<!-- 查询推荐商品 -->
+	<select id="selectRecommendGoods" resultType="com.ch.ebusiness.entity.Goods" parameterType="integer">
+		select 
+			gt.*, gy.typename 
+		from 
+			goodstable gt,goodstype gy 
+		where 
+			gt.goodstype_id = gy.id 
+			and gt.isRecommend = 1
+			<if test="tid != 0">
+				and gy.id = #{tid} 
+			</if>
+		order by  gt.id desc limit 6 
+	</select>
+	<!-- 查询最新商品 -->
+	<select id="selectLastedGoods" resultType="com.ch.ebusiness.entity.Goods" parameterType="integer">
+		select 
+			gt.*, gy.typename 
+		from 
+			goodstable gt,goodstype gy 
+		where 
+			gt.goodstype_id = gy.id 
+			<if test="tid != 0">
+				and gy.id = #{tid} 
+			</if>
+		order by  gt.id desc limit 6 
+	</select>
+	<!-- 浏览次数 -->
+	<select id="selectAView" resultType="com.ch.ebusiness.entity.View" parameterType="Integer">
+		select * from viewtime where view_id=#{id}
+	</select>
+	<!--没有浏览记录就新增，有就忽略-->
+	<insert id="checkAView" parameterType="Integer">
+		insert ignore viewtime (view_id, view_num) VALUES (#{id}, 0)
+	</insert>
+	<!--更新浏览次数-->
+	<insert id="updateAView" parameterType="Integer">
+		replace into viewtime (view_id, view_num) values (#{id}, (select view_num from viewtime as tb where view_id=#{id})+1)
+	</insert>
+	<insert id="addStaytime" parameterType="Integer">
+		insert into viewdetail (id, user_id, during, typeid) VALUES
+		(null, #{uid}, #{during}, #{typeid})
+	</insert>
+	<!-- 首页搜索 -->
+	<select id="search" resultType="com.ch.ebusiness.entity.Goods" parameterType="String">
+		select gt.*, gy.typename from GOODSTABLE gt,GOODSTYPE gy where gt.goodstype_id = gy.id 
+		and gt.gname like concat('%',#{mykey},'%')
+	</select>
+</mapper>
